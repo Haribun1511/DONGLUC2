@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Trình độ Học tập</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+        .knowledge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+        }
+        .points {
+            display: flex;
+            gap: 5px;
+        }
+        .point {
+            width: 15px;
+            height: 15px;
+            background-color: lightgray;
+            border-radius: 50%;
+        }
+        .filled {
+            background-color: green;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Theo dõi Trình độ Học tập</h1>
+    <div class="container">
+        <h2>Danh sách kiến thức</h2>
+        <div id="knowledge-list"></div>
+        <button onclick="addKnowledge()">Thêm kiến thức</button>
+        <h3>Bảng tổng hợp:</h3>
+        <ul id="summary-list"></ul>
+    </div>
+    
+    <script>
+        function addKnowledge() {
+            const knowledgeList = document.getElementById('knowledge-list');
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.placeholder = 'Nhập tên kiến thức';
+            
+            const pointsContainer = document.createElement('div');
+            pointsContainer.className = 'points';
+            
+            let points = 0;
+            let maxPoints = 5;
+            let score = 0;
+            let pointElements = [];
+            
+            for (let i = 0; i < maxPoints; i++) {
+                const point = document.createElement('div');
+                point.className = 'point';
+                pointsContainer.appendChild(point);
+                pointElements.push(point);
+            }
+            
+            const button = document.createElement('button');
+            button.innerText = 'Học';
+            button.onclick = function () {
+                if (points < maxPoints) {
+                    pointElements[points].classList.add('filled');
+                    points++;
+                    score += 10;
+                    
+                    if (points === 5) {
+                        score = Math.floor(score * 1.25);
+                    } else if (points === 10) {
+                        score = Math.floor(score * 1.34);
+                    } else if (points === 20) {
+                        score = Math.floor(score * 1.6);
+                    }
+                    updateSummary(nameInput.value || 'Kiến thức chưa đặt tên', points, score);
+                }
+            };
+            
+            const knowledgeItem = document.createElement('div');
+            knowledgeItem.className = 'knowledge-item';
+            knowledgeItem.appendChild(nameInput);
+            knowledgeItem.appendChild(pointsContainer);
+            knowledgeItem.appendChild(button);
+            knowledgeList.appendChild(knowledgeItem);
+            
+            nameInput.addEventListener('change', function () {
+                const existingItems = document.querySelectorAll('#summary-list li');
+                for (let item of existingItems) {
+                    if (item.dataset.name === nameInput.value) {
+                        if (confirm('Bạn đã vượt quá mục tiêu trong ngày! Bạn có muốn tăng tiến độ lên không?')) {
+                            maxPoints = 20;
+                            while (pointElements.length < maxPoints) {
+                                const point = document.createElement('div');
+                                point.className = 'point';
+                                pointsContainer.appendChild(point);
+                                pointElements.push(point);
+                            }
+                        }
+                        break;
+                    }
+                }
+            });
+        }
+        
+        function updateSummary(name, points, score) {
+            const summaryList = document.getElementById('summary-list');
+            let items = summaryList.getElementsByTagName('li');
+            for (let item of items) {
+                if (item.dataset.name === name) {
+                    item.innerText = `${name}: ${points}/${item.dataset.maxPoints} - Điểm: ${score}`;
+                    return;
+                }
+            }
+            const listItem = document.createElement('li');
+            listItem.dataset.name = name;
+            listItem.dataset.maxPoints = 5;
+            listItem.innerText = `${name}: ${points}/5 - Điểm: ${score}`;
+            summaryList.appendChild(listItem);
+        }
+    </script>
+</body>
+</html>
