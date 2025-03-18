@@ -7,34 +7,10 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-    background: linear-gradient(120deg, #ffffff, #06afe8);
-    color: #333;
-}
-.knowledge-item {
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-.point {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid #ddd;
-}
-.filled {
-    background-color: orange;
-}
-button {
-    background: #75f1ff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-}
-button:hover {
-    background: #06afe8;
-
+            text-align: center;
+            margin: 20px;
+            background: linear-gradient(120deg, #ffffff, #06afe8);
+            color: #333;
         }
         .container {
             max-width: 500px;
@@ -42,15 +18,24 @@ button:hover {
         }
         .knowledge-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin: 5px 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 400px; /* Đảm bảo không bị quá nhỏ */
+    width: fit-content; /* Điều chỉnh theo nội dung */
+    max-width: 100%;
         }
         .points {
             display: flex;
-            gap: 5px;
+    flex-wrap: wrap; /* Cho phép các điểm xuống dòng nếu quá dài */
+    gap: 8px;
+    max-width: 100%; /* Đảm bảo không tràn ra ngoài */
+    justify-content: flex-start;
         }
         .point {
             width: 15px;
@@ -62,7 +47,27 @@ button:hover {
             background-color: green;
         }
         button {
+            background: #75f1ff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
             cursor: pointer;
+        }
+        button:hover {
+            background: #06afe8;
+        }
+        /* Thêm viền bao quanh bảng tổng hợp */
+        .summary-container {
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .summary-container h3 {
+            margin: 0;
+            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -72,12 +77,18 @@ button:hover {
         <h2>Danh sách kiến thức</h2>
         <div id="knowledge-list"></div>
         <button onclick="addKnowledge()">Thêm kiến thức</button>
-        <h3>Bảng tổng hợp:</h3>
-        <ul id="summary-list"></ul>
-        
+
+        <!-- Thêm ô bao quanh bảng tổng hợp -->
+        <div class="summary-container">
+            <h3>Bảng tổng hợp:</h3>
+            <ul id="summary-list"></ul>
+            <h4>Tổng điểm hôm nay: <span id="total-score">0</span></h4>
+        </div>
     </div>
     
     <script>
+        let totalScore = 0; // Biến tổng điểm của ngày hôm nay
+
         function addKnowledge() {
             const knowledgeList = document.getElementById('knowledge-list');
             const nameInput = document.createElement('input');
@@ -114,6 +125,7 @@ button:hover {
                     } else if (points === 20) {
                         score = Math.floor(score * 1.6);
                     }
+                    
                     updateSummary(nameInput.value || 'Kiến thức chưa đặt tên', points, score);
                 }
             };
@@ -147,17 +159,26 @@ button:hover {
         function updateSummary(name, points, score) {
             const summaryList = document.getElementById('summary-list');
             let items = summaryList.getElementsByTagName('li');
+            
             for (let item of items) {
                 if (item.dataset.name === name) {
+                    totalScore += score - parseInt(item.dataset.score); // Cập nhật tổng điểm
+                    item.dataset.score = score;
                     item.innerText = `${name}: ${points}/${item.dataset.maxPoints} - Điểm: ${score}`;
+                    document.getElementById('total-score').innerText = totalScore; // Hiển thị tổng điểm
                     return;
                 }
             }
+            
             const listItem = document.createElement('li');
             listItem.dataset.name = name;
             listItem.dataset.maxPoints = 5;
+            listItem.dataset.score = score;
             listItem.innerText = `${name}: ${points}/5 - Điểm: ${score}`;
             summaryList.appendChild(listItem);
+
+            totalScore += score; // Cộng điểm vào tổng điểm
+            document.getElementById('total-score').innerText = totalScore; // Cập nhật điểm trên giao diện
         }
     </script>
 </body>
