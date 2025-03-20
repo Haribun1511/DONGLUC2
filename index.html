@@ -170,7 +170,7 @@ function loadData() {
     if (savedData) {
         const data = JSON.parse(savedData);
         const now = Date.now();
-        const expiryTime = 24 * 60 * 60 * 1000; // 24 giờ
+        const expiryTime = 20 * 60 * 60 * 1000; // 20 giờ
         
         if (now - data.timestamp < expiryTime) {
             totalScore = data.totalScore;
