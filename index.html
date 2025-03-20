@@ -5,6 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý Trình độ Học tập</title>
     <style>
+        .modal {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+    z-index: 1000;
+}
+
+.modal h3 {
+    margin-bottom: 15px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+}
+
+button.modal-btn {
+    background: #06afe8;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.modal-btn:hover {
+    background: #028bb8;
+}
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -86,7 +134,94 @@
         </div>
     </div>
     
+    <div class="modal-overlay" id="modal-overlay"></div>
+<div class="modal" id="custom-modal">
+    <h3>Bạn đã vượt quá mục tiêu trong ngày!</h3>
+    <p>Bạn có muốn tăng tiến độ lên không?</p>
+    <div class="modal-buttons">
+        <button class="modal-btn" id="modal-ok">OK</button>
+        <button class="modal-btn" id="modal-cancel">Hủy</button>
+    </div>
+</div>
+    
     <script>
+        // Hàm lưu dữ liệu vào LocalStorage kèm thời gian hết hạn
+function saveData() {
+    const data = {
+        knowledge: [],
+        totalScore: totalScore,
+        timestamp: Date.now() // Lưu thời gian hiện tại
+    };
+    
+    document.querySelectorAll('#summary-list li').forEach(item => {
+        data.knowledge.push({
+            name: item.dataset.name,
+            points: parseInt(item.dataset.maxPoints),
+            score: parseInt(item.dataset.score)
+        });
+    });
+    
+    localStorage.setItem('learningData', JSON.stringify(data));
+}
+
+// Hàm tải dữ liệu từ LocalStorage
+function loadData() {
+    const savedData = localStorage.getItem('learningData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        const now = Date.now();
+        const expiryTime = 24 * 60 * 60 * 1000; // 24 giờ
+        
+        if (now - data.timestamp < expiryTime) {
+            totalScore = data.totalScore;
+            document.getElementById('total-score').innerText = totalScore;
+            const summaryList = document.getElementById('summary-list');
+            
+            data.knowledge.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.dataset.name = item.name;
+                listItem.dataset.maxPoints = item.points;
+                listItem.dataset.score = item.score;
+                listItem.innerText = `${item.name}: ${item.points}/5 - Điểm: ${item.score}`;
+                summaryList.appendChild(listItem);
+            });
+        } else {
+            localStorage.removeItem('learningData'); // Xóa nếu hết hạn
+        }
+    }
+}
+
+// Gọi hàm loadData() khi trang tải lại
+window.onload = loadData;
+
+// Gọi saveData() sau mỗi lần cập nhật
+function updateSummary(name, points, score) {
+    const summaryList = document.getElementById('summary-list');
+    let items = summaryList.getElementsByTagName('li');
+    
+    for (let item of items) {
+        if (item.dataset.name === name) {
+            totalScore += score - parseInt(item.dataset.score);
+            item.dataset.score = score;
+            item.innerText = `${name}: ${points}/${item.dataset.maxPoints} - Điểm: ${score}`;
+            document.getElementById('total-score').innerText = totalScore;
+            saveData(); // Lưu sau khi cập nhật
+            return;
+        }
+    }
+    
+    const listItem = document.createElement('li');
+    listItem.dataset.name = name;
+    listItem.dataset.maxPoints = 5;
+    listItem.dataset.score = score;
+    listItem.innerText = `${name}: ${points}/5 - Điểm: ${score}`;
+    summaryList.appendChild(listItem);
+    
+    totalScore += score;
+    document.getElementById('total-score').innerText = totalScore;
+    saveData(); // Lưu sau khi cập nhật
+}
+
         let totalScore = 0; // Biến tổng điểm của ngày hôm nay
 
         function addKnowledge() {
