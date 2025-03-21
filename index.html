@@ -40,7 +40,18 @@
     background: rgba(0, 0, 0, 0.4);
     z-index: 999;
 }
-
+.background-options {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+.bg-option {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #000;
+        }
 button.modal-btn {
     background: #06afe8;
     color: white;
@@ -59,6 +70,7 @@ button.modal-btn:hover {
             margin: 20px;
             background: linear-gradient(120deg, #ffffff, #06afe8);
             color: #333;
+            transition: background 0.5s ease-in-out;
         }
         .container {
             max-width: 500px;
@@ -121,6 +133,12 @@ button.modal-btn:hover {
 </head>
 <body>
     <h1>Theo dõi Trình độ Học tập</h1>
+    <div class="background-options">
+        <div class="bg-option" style="background-color: lightblue;" onclick="changeBackground('lightblue')"></div>
+        <div class="bg-option" style="background-color: lightpink;" onclick="changeBackground('lightpink')"></div>
+        <div class="bg-option" style="background-color: lightgray;" onclick="changeBackground('lightgray')"></div>
+        <div class="bg-option" style="background-color: white;" onclick="changeBackground('white')"></div>
+    </div>
     <div class="container">
         <h2>Danh sách kiến thức</h2>
         <div id="knowledge-list"></div>
@@ -170,7 +188,7 @@ function loadData() {
     if (savedData) {
         const data = JSON.parse(savedData);
         const now = Date.now();
-        const expiryTime = 20 * 60 * 60 * 1000; // 20 giờ
+        const expiryTime = 24 * 60 * 60 * 1000; // 24 giờ
         
         if (now - data.timestamp < expiryTime) {
             totalScore = data.totalScore;
@@ -314,6 +332,9 @@ function updateSummary(name, points, score) {
 
             totalScore += score; // Cộng điểm vào tổng điểm
             document.getElementById('total-score').innerText = totalScore; // Cập nhật điểm trên giao diện
+        }
+        function changeBackground(color) {
+            document.body.style.background = color;
         }
     </script>
 </body>
